@@ -1,7 +1,10 @@
 ﻿#pragma once
+#include<iostream>
 #include<set>
 #include<string>
 #include<map>
+#include<iomanip>
+
 class DeterministicFiniteAutomaton
 {
 private:
@@ -20,5 +23,8 @@ public:
 
 	bool VerifyAutomaton();
 
+	bool CheckWord(const std::string word);
+
+	friend std::ostream& operator <<(std::ostream& os,const DeterministicFiniteAutomaton& dfa);
 };
 
