@@ -19,7 +19,7 @@ int main() {
 
     std::cout << dfa << "\n";
 
-    std::string word = "abb";
+    std::string word = "aab";
     if (dfa.CheckWord(word)) {
         std::cout << "Cuvantul \"" << word << "\" este acceptat de automat.\n";
     }

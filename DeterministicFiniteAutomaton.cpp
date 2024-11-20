@@ -52,9 +52,9 @@ bool DeterministicFiniteAutomaton::CheckWord(const std::string word)
 	std::string currentState = initialState;
 
 	for (const auto& character : word) {
-		if (alphabet.find(word) == alphabet.end())
-			return false;
 		std::string symbol(1, character);
+		if (alphabet.find(symbol) == alphabet.end())
+			return false;
 		auto it = transitionFunction.find({ currentState,symbol });
 		if (it == transitionFunction.end())
 			return false;
