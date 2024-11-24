@@ -128,10 +128,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DeterministicFiniteAutomaton.cpp" />
+    <ClCompile Include="NedeterministicFiniteAutomaton.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DeterministicFiniteAutomaton.h" />
+    <ClInclude Include="NedeterministicFiniteAutomaton.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

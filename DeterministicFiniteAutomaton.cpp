@@ -1,22 +1,22 @@
 ﻿#include "DeterministicFiniteAutomaton.h"
 
 DeterministicFiniteAutomaton::DeterministicFiniteAutomaton(const std::set<std::string> states, const std::set<std::string> alphabet, const std::map<std::pair<std::string, std::string>, std::string> transitionFunction, const std::string initialState, const std::set<std::string> finalStates)
-	:states(states),alphabet(alphabet),transitionFunction(transitionFunction),initialState(initialState),finalStates(finalStates)
+	:states{ states }, alphabet{ alphabet }, transitionFunction{ transitionFunction }, initialState{ initialState }, finalStates{ finalStates }
 {
 }
 
 bool DeterministicFiniteAutomaton::VerifyAutomaton()
 {
 	if (states.find(initialState) == states.end())
-		return false; // Starea initiala nevalida
+		return false;
 
 	for (const auto& state : finalStates) {
 		if (states.find(state) == states.end())
-			return false; // Starile finale nevalide
+			return false;
 	}
 
 	if (alphabet.empty())
-		return false; // Alfabet gol
+		return false;
 
 	for (const auto& transition : transitionFunction) {
 		const auto& key = transition.first;
@@ -26,23 +26,23 @@ bool DeterministicFiniteAutomaton::VerifyAutomaton()
 		const std::string& symbol = key.second;
 
 		if (states.find(currentState) == states.end()) {
-			return false; // Stare invalida
+			return false;
 		}
 
 		if (alphabet.find(symbol) == alphabet.end()) {
-			return false; // Simbol invalid
+			return false;
 		}
 
 		if (states.find(resultState) == states.end()) {
-			return false; // Tranzitie spre o stare invalida
+			return false;
 		}
 	}
 
 	if (states.empty())
-		return false; // Nu exista stari
+		return false;
 
 	if (finalStates.empty())
-		return false; // Nu exista stari finale
+		return false;
 
 	return true;
 }
