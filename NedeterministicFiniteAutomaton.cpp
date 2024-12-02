@@ -1,6 +1,6 @@
 #include "NedeterministicFiniteAutomaton.h"
 
-int NedeterministicFiniteAutomaton::prioritate(char op)
+int NedeterministicFiniteAutomaton::priority(char op)
 {
     if (op == '(')
         return 0;
@@ -11,23 +11,6 @@ int NedeterministicFiniteAutomaton::prioritate(char op)
     if (op == '*')
         return 3;
     return -1;
-}
-
-bool NedeterministicFiniteAutomaton::verificaParanteze(const std::string& expresie)
-{
-    std::stack<char> paranteze;
-    for (char c : expresie) {
-        if (c == '(') {
-            paranteze.push(c);
-        }
-        else if (c == ')') {
-            if (paranteze.empty()) {
-                return false;
-            }
-            paranteze.pop();
-        }
-    }
-    return paranteze.empty();
 }
 
 NedeterministicFiniteAutomaton::Automaton
@@ -81,57 +64,57 @@ NedeterministicFiniteAutomaton::NedeterministicFiniteAutomaton() :stateCounter{ 
 {
 }
 
-std::string NedeterministicFiniteAutomaton::FormaPoloneza( std::string& expresie)
+std::string NedeterministicFiniteAutomaton::PolishForm( std::string& expresion)
 {
-    std::string fp;
-    std::stack<char> operatori;
+    std::string pf;
+    std::stack<char> operators;
 
-    for (size_t i = 0; i < expresie.size(); ++i) {
-        char curent = expresie[i];
+    for (size_t i = 0; i < expresion.size(); ++i) {
+        char current = expresion[i];
 
-        if (isalnum(curent)) {
-            fp.push_back(curent);
+        if (isalnum(current)) {
+            pf.push_back(current);
 
-            if (i + 1 < expresie.size() && (isalnum(expresie[i + 1]) || expresie[i + 1] == '(')) {
-                while (!operatori.empty() && prioritate(operatori.top()) >= prioritate('.')) {
-                    fp.push_back(operatori.top());
-                    operatori.pop();
+            if (i + 1 < expresion.size() && (isalnum(expresion[i + 1]) || expresion[i + 1] == '(')) {
+                while (!operators.empty() && priority(operators.top()) >= priority('.')) {
+                    pf.push_back(operators.top());
+                    operators.pop();
                 }
-                operatori.push('.');
+                operators.push('.');
             }
         }
-        else if (curent == '(') {
-            operatori.push(curent);
+        else if (current == '(') {
+            operators.push(current);
         }
-        else if (curent == ')') {
-            while (!operatori.empty() && operatori.top() != '(') {
-                fp.push_back(operatori.top());
-                operatori.pop();
+        else if (current == ')') {
+            while (!operators.empty() && operators.top() != '(') {
+                pf.push_back(operators.top());
+                operators.pop();
             }
-            if (!operatori.empty())
-                operatori.pop();
+            if (!operators.empty())
+                operators.pop();
         }
-        else if (curent == '*' || curent == '|' || curent == '.') {
-            while (!operatori.empty() && prioritate(operatori.top()) >= prioritate(curent)) {
-                fp.push_back(operatori.top());
-                operatori.pop();
+        else if (current == '*' || current == '|' || current == '.') {
+            while (!operators.empty() && priority(operators.top()) >= priority(current)) {
+                pf.push_back(operators.top());
+                operators.pop();
             }
-            operatori.push(curent);
+            operators.push(current);
         }
     }
 
-    while (!operatori.empty()) {
-        fp.push_back(operatori.top());
-        operatori.pop();
+    while (!operators.empty()) {
+        pf.push_back(operators.top());
+        operators.pop();
     }
 
-    return fp;
+    return pf;
 }
 
 NedeterministicFiniteAutomaton::Automaton
 NedeterministicFiniteAutomaton::buildAutomaton(std::string& expresion)
 {
-    std::string polishForm = FormaPoloneza(expresion);
+    std::string polishForm = PolishForm(expresion);
     std::stack<Automaton> SA;
 
     for (char c : polishForm) {

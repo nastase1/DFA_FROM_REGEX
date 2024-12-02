@@ -19,9 +19,7 @@ private:
 
     int stateCounter = 0;
 
-    int prioritate(char op);
-
-    bool verificaParanteze(const std::string& expresie);
+    int priority(char op);
 
     Automaton createBasicAutomaton(char symbol);
 
@@ -35,9 +33,9 @@ public:
 
 	NedeterministicFiniteAutomaton();
 
-    std::string FormaPoloneza(std::string& expresie);
+    std::string PolishForm(std::string& expresion);
 
-    Automaton buildAutomaton(std::string& fp);
+    Automaton buildAutomaton(std::string& expresion);
 };
 
 
