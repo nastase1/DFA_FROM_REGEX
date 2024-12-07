@@ -5,7 +5,10 @@
 #include <stack>
 #include <vector>
 #include <tuple>
-
+#include<set>
+#include<map>
+#include"DeterministicFiniteAutomaton.h"
+#include<queue>
 
 class NedeterministicFiniteAutomaton
 {
@@ -18,6 +21,8 @@ private:
     };
 
     int stateCounter = 0;
+
+    Automaton automaton;
 
     int priority(char op);
 
@@ -36,6 +41,12 @@ public:
     std::string PolishForm(std::string& expresion);
 
     Automaton buildAutomaton(std::string& expresion);
+    std::set<int> lambdaClosure(int state, const std::vector<std::tuple<int, char, int>>& transitions);
+
+    std::map<int, std::set<int>> computeLambdaClosures();
+
+    DeterministicFiniteAutomaton toDeterministic();
+
 };
 
 

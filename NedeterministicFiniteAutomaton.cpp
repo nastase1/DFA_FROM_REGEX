@@ -144,3 +144,91 @@ NedeterministicFiniteAutomaton::buildAutomaton(std::string& expresion)
     return SA.top();
 
 }
+
+std::set<int> NedeterministicFiniteAutomaton::lambdaClosure(int state, const std::vector<std::tuple<int, char, int>>& transitions)
+{
+        std::set<int> closure = { state };
+        std::stack<int> stack;
+        stack.push(state);
+
+        while (!stack.empty()) {
+            int current = stack.top();
+            stack.pop();
+
+            for (const auto& [src, symbol, dest] : transitions) {
+                if (src == current && symbol == '\0' && closure.find(dest) == closure.end()) {
+                    closure.insert(dest);
+                    stack.push(dest);
+                }
+            }
+        }
+
+        return closure;
+}
+
+std::map<int, std::set<int>> NedeterministicFiniteAutomaton::computeLambdaClosures()
+{
+        std::map<int, std::set<int>> closures;
+
+        for (int state = 0; state < stateCounter; ++state) {
+            closures[state] = lambdaClosure(state, automaton.transitions);
+        }
+
+        return closures;
+
+}
+
+DeterministicFiniteAutomaton NedeterministicFiniteAutomaton::toDeterministic()
+{
+        auto lambdaClosures = computeLambdaClosures();
+
+        std::map<std::set<int>, std::string> stateMapping; // Map de mul?imi de st?ri c?tre nume de stare
+        std::set<std::string> newStates; // St?ri DFA
+        std::set<std::string> newFinalStates; // St?ri finale DFA
+        std::map<std::pair<std::string, std::string>, std::string> newTransitions; // Func?ia de tranzi?ie DFA
+
+        std::queue<std::set<int>> queue;
+        std::set<int> startClosure = lambdaClosures[automaton.startState];
+        queue.push(startClosure);
+        stateMapping[startClosure] = "q0"; // Prima stare a DFA
+        newStates.insert("q0");
+
+        int stateCount = 1;
+
+        while (!queue.empty()) {
+            auto currentSet = queue.front();
+            queue.pop();
+            std::string currentName = stateMapping[currentSet];
+
+            for (char symbol : alphabet) {
+                std::set<int> newSet;
+
+                for (int state : currentSet) {
+                    for (const auto& [src, sym, dest] : automaton.transitions) {
+                        if (src == state && sym == symbol) {
+                            newSet.insert(lambdaClosures[dest].begin(), lambdaClosures[dest].end());
+                        }
+                    }
+                }
+
+                if (!newSet.empty()) {
+                    if (stateMapping.find(newSet) == stateMapping.end()) {
+                        stateMapping[newSet] = "q" + std::to_string(stateCount++);
+                        newStates.insert(stateMapping[newSet]);
+                        queue.push(newSet);
+
+                        // Verific?m dac? este stare final?
+                        for (int finalState : finalStates) {
+                            if (newSet.find(finalState) != newSet.end()) {
+                                newFinalStates.insert(stateMapping[newSet]);
+                            }
+                        }
+                    }
+
+                    newTransitions[{currentName, std::string(1, symbol)}] = stateMapping[newSet];
+                }
+            }
+        }
+
+        return DeterministicFiniteAutomaton(newStates, alphabet, newTransitions, "q0", newFinalStates);
+}
