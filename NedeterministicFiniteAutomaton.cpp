@@ -20,7 +20,7 @@ NedeterministicFiniteAutomaton::createBasicAutomaton(char symbol) {
 
     Automaton result{ start, end, {{start, symbol, end}}, {end}, {} };
     if (symbol != '\0') {
-        result.alphabet.insert(symbol); // Adăugăm simbolul în alfabet
+        result.alphabet.insert(symbol); 
     }
     result.finalStates = {end};
     return result;
@@ -160,11 +160,26 @@ NedeterministicFiniteAutomaton::buildAutomaton(std::string& expresion)
     }
 
     Automaton finalAutomaton = SA.top();
-    finalAutomaton.finalStates = { finalAutomaton.finalState };
-    automaton = finalAutomaton; // Salvează automatul construit
-    return finalAutomaton;
+    SA.pop();
 
+    finalAutomaton.startState = std::get<0>(finalAutomaton.transitions.front());
+    finalAutomaton.finalState = std::get<2>(finalAutomaton.transitions.back());
+
+    finalAutomaton.finalStates = { finalAutomaton.finalState };
+    automaton = finalAutomaton;
+
+    std::cout << "Stare initiala: " << finalAutomaton.startState << "\n";
+    std::cout << "Stare finala: " << finalAutomaton.finalState << "\n";
+    std::cout << "Tranzitii:\n";
+    for (const auto& [src, sym, dest] : finalAutomaton.transitions) {
+        std::cout << src << " --" << sym << "--> " << dest << "\n";
+    }
+
+    return finalAutomaton;
 }
+
+
+
 
 std::set<int> NedeterministicFiniteAutomaton::lambdaClosure(int state, const std::vector<std::tuple<int, char, int>>& transitions)
 {
@@ -202,60 +217,47 @@ std::map<int, std::set<int>> NedeterministicFiniteAutomaton::computeLambdaClosur
 
 DeterministicFiniteAutomaton NedeterministicFiniteAutomaton::toDeterministic() {
     auto lambdaClosures = computeLambdaClosures();
-    std::cout << "Lambda-închideri pentru fiecare stare:\n";
-    for (const auto& [state, closure] : lambdaClosures) {
-        std::cout << "Stare " << state << ": { ";
-        for (int c : closure) std::cout << c << " ";
-        std::cout << "}\n";
-    }
-    // Map to track state sets to DFA states
     std::map<std::set<int>, std::string> stateMapping;
     std::set<std::string> newStates;
     std::set<std::string> newFinalStates;
     std::map<std::pair<std::string, std::string>, std::string> newTransitions;
-
-    // Queue for processing DFA states
     std::queue<std::set<int>> queue;
-
-    // Initial DFA state is the lambda closure of the NFA start state
     std::set<int> startClosure = lambdaClosures[automaton.startState];
+
     stateMapping[startClosure] = "q0";
     newStates.insert("q0");
     queue.push(startClosure);
+    int stateCount = 1;
 
-    static int stateCount = 0;
+    std::cout << "Alfabetul automatonului: ";
+    for (char symbol : automaton.alphabet) {
+        std::cout << symbol << " ";
+    }
+    std::cout << "\n";
 
-    // Process DFA states
     while (!queue.empty()) {
         auto currentSet = queue.front();
         queue.pop();
         std::string currentName = stateMapping[currentSet];
 
-        // Parcurgem fiecare simbol din alfabet
         for (char symbol : automaton.alphabet) {
             std::set<int> newSet;
 
-            // Pentru fiecare stare din setul curent
             for (int state : currentSet) {
-                // Găsim toate tranzițiile din această stare pe simbolul curent
                 for (const auto& [src, sym, dest] : automaton.transitions) {
                     if (src == state && sym == symbol) {
-                        // Adăugăm lambda-închiderea stării de destinație
                         newSet.insert(lambdaClosures[dest].begin(), lambdaClosures[dest].end());
                     }
                 }
             }
 
-            // Dacă am găsit un set nou de stări
             if (!newSet.empty()) {
-                // Dacă setul de stări nu există încă în DFA, îl adăugăm
                 if (stateMapping.find(newSet) == stateMapping.end()) {
                     std::string newName = "q" + std::to_string(stateCount++);
                     stateMapping[newSet] = newName;
                     newStates.insert(newName);
                     queue.push(newSet);
 
-                    // Verificăm dacă este stare finală
                     for (int finalState : automaton.finalStates) {
                         if (newSet.find(finalState) != newSet.end()) {
                             newFinalStates.insert(newName);
@@ -264,25 +266,30 @@ DeterministicFiniteAutomaton NedeterministicFiniteAutomaton::toDeterministic() {
                     }
                 }
 
-                // Adăugăm tranziția din DFA
                 newTransitions[{currentName, std::string(1, symbol)}] = stateMapping[newSet];
+                std::cout << "Adaugat tranzitie DFA: (" << currentName << ", " << symbol << ") -> " << stateMapping[newSet] << "\n";
             }
         }
     }
 
-
-    // Convert alphabet to std::set<std::string>
     std::set<std::string> stringAlphabet;
     for (char c : automaton.alphabet) {
         stringAlphabet.insert(std::string(1, c));
     }
 
-    // Return the DFA
+    std::cout << "Tranzitii DFA:\n";
+    for (const auto& [key, value] : newTransitions) {
+        std::cout << "(" << key.first << ", " << key.second << ") -> " << value << "\n";
+    }
+
     return DeterministicFiniteAutomaton(
-        newStates,           // DFA states
-        stringAlphabet,      // DFA alphabet
-        newTransitions,      // DFA transition function
-        "q0",                // Initial state
-        newFinalStates       // Final states
+        newStates,
+        stringAlphabet,
+        newTransitions,
+        "q0",
+        newFinalStates
     );
 }
+
+
+

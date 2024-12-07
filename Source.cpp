@@ -32,7 +32,7 @@ int main() {
     NedeterministicFiniteAutomaton nfa;
 
     // Expresia regulată
-    std::string regex = "a.b.a.(a.a|b.b)*.c.(a.b)*";
+    std::string regex = "a|b";
 
     // Construirea AFN
     auto automaton = nfa.buildAutomaton(regex);

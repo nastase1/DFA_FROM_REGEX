@@ -18,7 +18,7 @@ private:
         int startState;
         int finalState;
         std::vector<std::tuple<int, char, int>> transitions;
-        std::set<int> finalStates; // Set de stări finale
+        std::set<int> finalStates; 
         std::set<char> alphabet;
     };
 

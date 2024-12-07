@@ -66,30 +66,28 @@ bool DeterministicFiniteAutomaton::CheckWord(const std::string word)
 
 std::ostream& operator<<(std::ostream& os, const DeterministicFiniteAutomaton& dfa)
 {
-	os << std::setw(3) << "Q \\ Σ" << " || ";
+	os << std::setw(10) << "Q \\ $" << " || ";
 	for (const auto& symbol : dfa.alphabet) {
 		os << std::setw(10) << symbol;
 	}
 	os << " ||\n";
 
-	os << std::string(12 + dfa.alphabet.size() * 10, '-') << "\n";
+	os << std::string(17 + dfa.alphabet.size() * 10, '-') << "\n";
 
 	for (const auto& state : dfa.states) {
-		// Marcăm starea în funcție de proprietăți
-		if (state == dfa.initialState && dfa.finalStates.find(state) != dfa.finalStates.end()) {
-			os << "->*" << std::setw(3) << state << " || ";
-		}
-		else if (state == dfa.initialState) {
-			os << "->" << std::setw(4) << state << " || ";
+		if (state == dfa.initialState) {
+			os << "->" << std::setw(8) << state << " || ";
 		}
 		else if (dfa.finalStates.find(state) != dfa.finalStates.end()) {
-			os << "*" << std::setw(4) << state << " || ";
+			os << "*" << std::setw(9) << state << " || ";
+		}
+		else if (state == dfa.initialState && dfa.finalStates.find(state) != dfa.finalStates.end()) {
+			os << "->*" << std::setw(7) << state << " || ";
 		}
 		else {
-			os << std::setw(5) << state << " || ";
+			os << std::setw(10) << state << " || ";
 		}
 
-		// Afișăm tranzițiile pentru fiecare simbol
 		for (const auto& symbol : dfa.alphabet) {
 			auto it = dfa.transitionFunction.find({ state, symbol });
 			if (it != dfa.transitionFunction.end()) {
@@ -104,4 +102,5 @@ std::ostream& operator<<(std::ostream& os, const DeterministicFiniteAutomaton& d
 
 	return os;
 }
+
 
