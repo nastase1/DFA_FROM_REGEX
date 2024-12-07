@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -18,6 +18,8 @@ private:
         int startState;
         int finalState;
         std::vector<std::tuple<int, char, int>> transitions;
+        std::set<int> finalStates; // Set de stări finale
+        std::set<char> alphabet;
     };
 
     int stateCounter = 0;
@@ -34,6 +36,7 @@ private:
 
     Automaton kleeneStarAutomaton(const Automaton& a);
 
+    std::set<char> alphabet;
 public:
 
 	NedeterministicFiniteAutomaton();
@@ -41,6 +44,7 @@ public:
     std::string PolishForm(std::string& expresion);
 
     Automaton buildAutomaton(std::string& expresion);
+
     std::set<int> lambdaClosure(int state, const std::vector<std::tuple<int, char, int>>& transitions);
 
     std::map<int, std::set<int>> computeLambdaClosures();

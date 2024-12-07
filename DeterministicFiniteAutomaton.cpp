@@ -64,40 +64,44 @@ bool DeterministicFiniteAutomaton::CheckWord(const std::string word)
 	return finalStates.find(currentState) != finalStates.end();
 }
 
-std::ostream& operator<<(std::ostream& os, const DeterministicFiniteAutomaton& dfa) 
+std::ostream& operator<<(std::ostream& os, const DeterministicFiniteAutomaton& dfa)
 {
 	os << std::setw(3) << "Q \\ Σ" << " || ";
-    for (const auto& symbol : dfa.alphabet) {
-        os << std::setw(10) << symbol;
-    }
-    os << " ||\n";
+	for (const auto& symbol : dfa.alphabet) {
+		os << std::setw(10) << symbol;
+	}
+	os << " ||\n";
 
-    os << std::string(12 + dfa.alphabet.size() * 10, '-') << "\n";
+	os << std::string(12 + dfa.alphabet.size() * 10, '-') << "\n";
 
-    for (const auto& state : dfa.states) {
-		if (state == dfa.initialState) {
-			os << "->" << std::setw(3) << state << " || ";
+	for (const auto& state : dfa.states) {
+		// Marcăm starea în funcție de proprietăți
+		if (state == dfa.initialState && dfa.finalStates.find(state) != dfa.finalStates.end()) {
+			os << "->*" << std::setw(3) << state << " || ";
+		}
+		else if (state == dfa.initialState) {
+			os << "->" << std::setw(4) << state << " || ";
 		}
 		else if (dfa.finalStates.find(state) != dfa.finalStates.end()) {
 			os << "*" << std::setw(4) << state << " || ";
 		}
-		else if (state == dfa.initialState && dfa.finalStates.find(state) != dfa.finalStates.end()) {
-			os << "->*" << std::setw(2) << state << " || ";
-		}
-		else
+		else {
 			os << std::setw(5) << state << " || ";
-        for (const auto& symbol : dfa.alphabet) {
-            auto it = dfa.transitionFunction.find({ state, symbol });
-            if (it != dfa.transitionFunction.end()) {
-                os << std::setw(10) << it->second;
-            }
-            else {
-                os << std::setw(10) << "-";
-            }
-        }
-        os << " ||\n";
-    }
+		}
 
-    return os;
+		// Afișăm tranzițiile pentru fiecare simbol
+		for (const auto& symbol : dfa.alphabet) {
+			auto it = dfa.transitionFunction.find({ state, symbol });
+			if (it != dfa.transitionFunction.end()) {
+				os << std::setw(10) << it->second;
+			}
+			else {
+				os << std::setw(10) << "-";
+			}
+		}
+		os << " ||\n";
+	}
+
+	return os;
 }
 
